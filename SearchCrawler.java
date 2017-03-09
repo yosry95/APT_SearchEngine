@@ -450,7 +450,8 @@ public class SearchCrawler extends JFrame
                 }
             
             }
-        }*/
+            */
+        }
 
 	// Perform the actual crawling, searching for the search string.
 	
