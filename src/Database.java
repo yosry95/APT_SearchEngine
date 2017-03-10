@@ -46,21 +46,12 @@ public class Database {
 	
 	public boolean createDocument (SiteHits siteHits){
 		try {
-		Document document = new Document("name", "Café Con Leche")
-	               .append("contact", new Document("phone", "228-555-0149")
-	                                       .append("email", "cafeconleche@example.com")
-	                                       .append("location",Arrays.asList(-73.92502, 40.8279556)))
-	               .append("stars", 3)
-	               .append("categories", Arrays.asList("Bakery", "Coffee", "Pastries"));
-
-		Document hit;
-		ArrayList<Document> hits = new ArrayList<Document>();
-		while(siteHits.hasHit()){
-			Pair<Integer,String> tmp = siteHits.nextHit();
-			hit = new Document("pos",tmp.getElement0())
-					.append("type", tmp.getElement1());
-			hits.add(hit);
-		}
+			ArrayList<Document> hits = new ArrayList<Document>();
+			while(siteHits.hasHit()){
+				Pair<Integer,String> tmp = siteHits.nextHit();
+				hits.add(new Document("pos",tmp.getElement0())
+						.append("type", tmp.getElement1()));
+			}
 		Document doc = new Document("word",siteHits.getWord())
 				.append("stemmed", siteHits.getStemmed())
 				.append("site hits",Arrays.asList(new Document("site",siteHits.getSite())
@@ -74,10 +65,23 @@ public class Database {
 		
 	}
 	
-	public boolean updateDocument(long id) {
-		collection.updateOne(
-                eq("_id", new ObjectId("57506d62f57802807471dd41")),
-                combine(set("stars", 1), set("contact.phone", "228-555-9999"), currentDate("lastModified")));
+	public boolean updateDocument(SiteHits siteHits) {
+		ArrayList<Document> hits = new ArrayList<Document>();
+		while(siteHits.hasHit()){
+			Pair<Integer,String> tmp = siteHits.nextHit();
+			hits.add(new Document("pos",tmp.getElement0())
+					.append("type", tmp.getElement1()));
+		}
+		Document doc = new Document("site","www.feedly.com")
+				.append("hits", hits);
+		
+		collection.updateOne(combine(eq("word",siteHits.getWord()),eq("site hits.site",siteHits.getSite())),set("site hits.$",doc));
+		
+//		collection.updateOne(eq("word","forcing"),addToSet("site hits", doc));
+
+//		collection.updateOne(
+//                eq("_id", new ObjectId("57506d62f57802807471dd41")),
+//                combine(set("stars", 1), set("contact.phone", "228-555-9999"), currentDate("lastModified")));
 		return true;
 	}
 	
